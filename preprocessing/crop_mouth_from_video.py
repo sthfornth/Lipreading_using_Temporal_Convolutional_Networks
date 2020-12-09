@@ -11,6 +11,7 @@ import cv2
 import glob
 import argparse
 import numpy as np
+import random
 from collections import deque
 
 from utils import *
@@ -35,8 +36,11 @@ def load_args(default_config=None):
     # -- convert to gray scale
     parser.add_argument('--convert-gray', default=False, action='store_true', help='convert2grayscale')
     # -- test set only
-    parser.add_argument('--testset-only', default=False, action='store_true', help='process testing set only')
-
+    parser.add_argument('--trainset-only', default=False, action='store_true', help='process training set only')
+    parser.add_argument('--testset-only', default=False, action='store_true', help='process test set only')
+    parser.add_argument('--remove-frame', default=None, help='remove frames')
+    parser.add_argument('--remove-pixel', default=None, help='remove pixels')
+    
     args = parser.parse_args()
     return args
 
@@ -123,22 +127,47 @@ def landmarks_interpolate(landmarks):
     assert len(valid_frames_idx) == len(landmarks), "not every frame has landmark"
     return landmarks
 
+def rmv_frames(sequence, noise = 0.1):
+#     print(noise)
+    num = int(29 * noise)
+#     print(num)
+    for i in range(num):
+        j = random.randrange(0, 29)
+        sequence[j] *= 0
+    return sequence
+
+def rmv_pixels(sequence, noise = 0.1):
+#     print(noise)
+    num = int(96 * noise)
+    for i in range(num):
+        x = random.randrange(0, 96)
+        for j in range(num):
+            y = random.randrange(0, 96)
+            sequence[:, x, y, :] *= 0
+    return sequence
 
 lines = open(args.filename_path).read().splitlines()
-lines = list(filter(lambda x: 'test' == x.split('/')[-2], lines)) if args.testset_only else lines
+if args.trainset_only:
+    lines = list(filter(lambda x: 'train' == x.split('/')[-2], lines)) 
+elif args.testset_only:
+    lines = list(filter(lambda x: 'test' == x.split('/')[-2], lines)) 
 
 for filename_idx, line in enumerate(lines):
 
     filename, person_id = line.split(',')
-    print('idx: {} \tProcessing.\t{}'.format(filename_idx, filename))
+    if filename_idx % 1000 == 0:
+        print('idx: {} \tProcessing.\t{}'.format(filename_idx, filename))
 
     video_pathname = os.path.join(args.video_direc, filename+'.mp4')
     landmarks_pathname = os.path.join(args.landmark_direc, filename+'.npz')
-    dst_pathname = os.path.join( args.save_direc, filename+'.npz')
+    dst_pathname = os.path.join(args.save_direc, filename+'.npz')
 
     assert os.path.isfile(video_pathname), "File does not exist. Path input: {}".format(video_pathname)
-    assert os.path.isfile(landmarks_pathname), "File does not exist. Path input: {}".format(landmarks_pathname)
-
+#     assert os.path.isfile(landmarks_pathname), "File does not exist. Path input: {}".format(landmarks_pathname)
+    if not os.path.isfile(landmarks_pathname):
+        print("File does not exist. Path input: {}".format(landmarks_pathname))
+        continue
+    
     if os.path.exists(dst_pathname):
         continue
 
@@ -158,9 +187,20 @@ for filename_idx, line in enumerate(lines):
     # -- crop
     sequence = crop_patch(video_pathname, preprocessed_landmarks)
     assert sequence is not None, "cannot crop from {}.".format(filename)
+    if args.remove_frame:
+        address = "frame_" + args.remove_frame
+        sequence = rmv_frames(sequence, int(args.remove_frame)/100.0)
+    if args.remove_pixel:
+        address = "pixel_" + args.remove_pixel
+        sequence = rmv_pixels(sequence, int(args.remove_pixel)/100.0)
+#     print(sequence.shape)
+#     exit(0) 
 
     # -- save
     data = convert_bgr2gray(sequence) if args.convert_gray else sequence[...,::-1]
-    save2npz(dst_pathname, data=data)
+    if not os.path.exists(os.path.join(args.save_direc, address)):
+        os.mkdir(os.path.join(args.save_direc, address))
+    pathname = os.path.join(args.save_direc, address, filename+'.npz')
+    save2npz(pathname, data=data)
 
 print('Done.')

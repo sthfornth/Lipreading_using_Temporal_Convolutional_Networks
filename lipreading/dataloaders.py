@@ -28,8 +28,9 @@ def get_preprocessing_pipelines():
 
 def get_data_loaders(args):
     preprocessing = get_preprocessing_pipelines()
-
-    # create dataset object for each partition
+    part_set = ['train', 'val', 'test']
+    part_set = ['train', 'test']
+#     create dataset object for each partition
     dsets = {partition: MyDataset(
                 data_partition=partition,
                 data_dir=args.data_dir,
@@ -37,7 +38,9 @@ def get_data_loaders(args):
                 annonation_direc=args.annonation_direc,
                 preprocessing_func=preprocessing[partition],
                 data_suffix='.npz'
-                ) for partition in ['test']}
+                ) for partition in part_set}
+#     print(args.annonation_direc)
+#     print(len(dsets["train"]), len(dsets["val"]), len(dsets["test"]))
     dset_loaders = {x: torch.utils.data.DataLoader(
                         dsets[x],
                         batch_size=args.batch_size,
@@ -45,5 +48,5 @@ def get_data_loaders(args):
                         collate_fn=pad_packed_collate,
                         pin_memory=False,
                         num_workers=4,
-                        worker_init_fn=np.random.seed(1))for x in ['test']}
+                        worker_init_fn=np.random.seed(1))for x in part_set}
     return dset_loaders
