@@ -4,6 +4,6 @@ __pycache__/
 *$py.class
 .idea/
 *.pyc
-*.tar
+#*.tar
 datasets/outputs
 .DS_Store
