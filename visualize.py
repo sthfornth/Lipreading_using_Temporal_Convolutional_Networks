@@ -1,3 +1,7 @@
+# This code is part of the Lip-reading project for 670 F2020
+# to visualize results.
+# by Catherine Huang
+
 import numpy as np
 import matplotlib.pyplot as plt
 from facial_landmarks import get_all_files_path
@@ -118,3 +122,5 @@ class_ratio = get_ratio_per_class(pred, truth, len(classes))
 bar_graph(class_ratio)
 bar_graph_max(class_ratio)
 bar_graph_min(class_ratio)
+
+# TODO: add code to do truth table and accuracy, percision, recall scores per class level
