@@ -1,6 +1,6 @@
-# This code is developed to be 
-# part of the Lip-reading Project code for preprocessing
-# video (mp4) file to extract ROI per frame. 
+# This code is developed to be part of the Lip-reading Project code for 670 F2020
+# preprocessing video (mp4) file to extract ROI per frame. 
+# by Catherine Huang
 # code based on the blog post: https://www.pyimagesearch.com/2017/04/03/facial-landmarks-dlib-opencv-python/
 import numpy as np
 import cv2
