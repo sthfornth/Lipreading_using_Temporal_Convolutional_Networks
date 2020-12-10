@@ -4,7 +4,10 @@ Extended from the respository of [Towards practical lipreading with distilled an
 
 We repeat the previous models and test on new datasets. We train the models on reduced [LRW dataset](http://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrw1.html). The network architecture is based on 3D convolution, ShuffleNet and Temporal Convolutional Network (TCN). 
 
-Also we visualize the truth tables in previous models and analyse the drawbacks.
+
+Also we visualize the truth tables in previous models and analyse the drawbacks, with the code in visualize.py. 
+
+To create more ROI datas, use the code in facial_landmarks.py.  The clips used should be more than 29 frames of any size in .mp4 format.  We used dlib(https://pypi.org/project/dlib/) with opencv to perform facial detection and landmarks, currently only support frontal facial view point.  
 
 
 ### How to preprocess raw data
